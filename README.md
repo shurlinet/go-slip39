@@ -3,6 +3,7 @@
 [![Go Tests](https://github.com/shurlinet/go-slip39/actions/workflows/test.yml/badge.svg)](https://github.com/shurlinet/go-slip39/actions/workflows/test.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/shurlinet/go-slip39.svg)](https://pkg.go.dev/github.com/shurlinet/go-slip39)
 [![Go Report Card](https://goreportcard.com/badge/github.com/shurlinet/go-slip39)](https://goreportcard.com/report/github.com/shurlinet/go-slip39)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Go implementation of [SLIP-0039](https://github.com/satoshilabs/slips/blob/master/slip-0039.md): Shamir's Secret Sharing for Mnemonic Codes.
 
@@ -11,9 +12,10 @@ Split a secret into mnemonic shares. Any threshold number of shares can reconstr
 ## Security
 
 - **Constant-time GF(2^8)**: Bitsliced arithmetic translated from the [Trezor firmware](https://github.com/trezor/trezor-firmware/blob/main/crypto/shamir.c). Zero data-dependent branches, zero table lookups. Immune to cache-timing and Spectre attacks.
-- **Memory zeroing**: All intermediate secrets are zeroed via `//go:noinline` functions. The caller is responsible for zeroing the returned secret from `Combine`.
+- **Memory zeroing**: All intermediate secrets are zeroed via `//go:noinline` functions. The caller is responsible for zeroing the returned secret from `Combine`. The Go garbage collector may copy data before zeroing occurs; for hardware-grade security, use a hardware wallet.
 - **Constant-time digest comparison**: `crypto/subtle.ConstantTimeCompare` for share verification.
 - **No math/big**: BitStream encoding replaces big integer arithmetic, eliminating limb-zeroing concerns.
+- **Concurrency**: `Split` and `Combine` are safe for concurrent use. No shared mutable state. The wordlist is immutable after init.
 - **Minimal dependencies**: Only `golang.org/x/crypto` (PBKDF2). Everything else is Go stdlib.
 
 ## Install
@@ -130,6 +132,57 @@ groups, err := slip39.Split(secret, nil,
 | Anti-tamper tests | Yes | No | No | N/A |
 | Dependencies | x/crypto only | Many | gonum, golang-set | None |
 | Max secret size | 64 bytes | No limit | 32 bytes | 32 bytes |
+
+## Consumer Responsibilities
+
+**Zero the recovered secret.** `Combine` returns a `[]byte` that the caller must zero after use: `defer slip39.ZeroBytes(recovered)`.
+
+**Wrong passphrase = different secret, not an error.** This is plausible deniability by design. There is no way to detect a wrong passphrase. The caller must verify the recovered secret independently (e.g., derive a public key and compare).
+
+**Share storage.** Shares are mnemonic strings. How you store and distribute them is your responsibility. The library provides the math; you provide the operational security.
+
+## Testing
+
+- 45 SatoshiLabs spec vectors (mandatory gate)
+- 6 Python cross-implementation vectors (deterministic seed, python-shamir-mnemonic 0.3.1)
+- 77 encode round-trips byte-matching the Python encoder
+- 65,536 exhaustive GF(256) multiplication verifications (bitsliced vs table oracle)
+- 20,460 exhaustive RS1024 single-error detection cases
+- 9 AI threat defense tests (Feistel round count, iteration base, digest length, special indices, wordlist hash, ZeroBytes effectiveness, secret-in-error scan, GF(256) exhaustive, reduction polynomial)
+- Property tests (share independence, determinism, threshold enforcement, concurrent safety)
+- 5 fuzz targets (Combine, RoundTrip, Interpolate, BitStream, Feistel)
+- Anti-tamper tests (HMAC argument order, customization string bytes, threshold encoding, independent HMAC oracle)
+
+```
+go test -race -count=1 ./...
+```
+
+## Examples
+
+See the [examples/](examples/) directory:
+
+- [basic](examples/basic/) - 1-of-1 split and combine, no passphrase
+- [sharing](examples/sharing/) - 2-of-3 with passphrase
+- [multigroup](examples/multigroup/) - 2-of-3 groups (family/lawyer/vault scenario)
+
+## Dependencies
+
+| Dependency | Purpose |
+|---|---|
+| `golang.org/x/crypto` | PBKDF2-HMAC-SHA256 (Feistel cipher round function) |
+
+No other external dependencies. Wordlist is embedded via `go:embed`.
+
+## AI Transparency
+
+This library was developed with assistance from Claude (Anthropic). All code was reviewed, tested against reference implementations, and verified against the SLIP-0039 specification. The test suite includes 9 AI threat defense tests designed to catch both human and AI-introduced errors. The AI generated code; the human made every design decision, reviewed every line, and owns every bug.
+
+## Acknowledgments
+
+- [SatoshiLabs](https://satoshilabs.com) for the [SLIP-0039 specification](https://github.com/satoshilabs/slips/blob/master/slip-0039.md) and official test vectors
+- [Daan Sprenkels](https://dsprenkels.com) for the bitsliced GF(2^8) arithmetic in [Trezor firmware](https://github.com/trezor/trezor-firmware/blob/main/crypto/shamir.c)
+- [Trezor](https://github.com/trezor/python-shamir-mnemonic) for the Python reference implementation used for cross-implementation verification
+- [Lucas Ontivero](https://github.com/lontivero/Slip39) for the BitStream encoding approach
 
 ## License
 
