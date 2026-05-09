@@ -6,7 +6,7 @@ package slip39
 import "errors"
 
 // Error sentinels for SLIP-0039 operations.
-// All error returns use %w wrapping so callers can use errors.Is (F204).
+// All error returns use %w wrapping so callers can use errors.Is.
 var (
 	ErrInvalidMnemonic   = errors.New("slip39: invalid mnemonic")
 	ErrInvalidChecksum   = errors.New("slip39: invalid checksum")

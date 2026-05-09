@@ -14,10 +14,10 @@ func ZeroBytes(b []byte) {
 	}
 }
 
-// ZeroUint64Array overwrites a bitsliced GF(256) array with zeros.
-// Used to erase intermediates in constant-time Shamir arithmetic.
+// zeroUint64Array overwrites a bitsliced GF(256) array with zeros.
+// Used internally to erase intermediates in constant-time Shamir arithmetic.
 //
 //go:noinline
-func ZeroUint64Array(s *[8]uint64) {
+func zeroUint64Array(s *[8]uint64) {
 	*s = [8]uint64{}
 }

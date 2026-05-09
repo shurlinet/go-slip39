@@ -3,9 +3,9 @@
 //
 // BitStream provides bit-level packing and unpacking for SLIP-0039 mnemonic encoding.
 // Inspired by the C# Slip39 implementation (lontivero/Slip39).
-// Replaces math/big for 10-bit word encoding, eliminating big.Int limb zeroing concerns (F121).
+// Replaces math/big for 10-bit word encoding, eliminating big.Int limb zeroing concerns.
 //
-// All operations use uint64 exclusively. Do NOT change to int64 (F280: arithmetic
+// All operations use uint64 exclusively. Do NOT change to int64 (arithmetic
 // shift on signed types would sign-extend, corrupting high bits).
 
 package slip39
@@ -18,7 +18,7 @@ type bitStreamWriter struct {
 	bitPos int // next bit position to write (0 = MSB of buf[0])
 }
 
-// newBitStreamWriter creates a writer pre-allocated for exactly totalBits (F175).
+// newBitStreamWriter creates a writer pre-allocated for exactly totalBits.
 func newBitStreamWriter(totalBits int) *bitStreamWriter {
 	byteLen := (totalBits + 7) / 8
 	return &bitStreamWriter{
@@ -27,7 +27,7 @@ func newBitStreamWriter(totalBits int) *bitStreamWriter {
 }
 
 // Write writes the lowest count bits of value into the stream, MSB first.
-// count must be in [1, 64] (F281).
+// count must be in [1, 64].
 func (w *bitStreamWriter) Write(value uint64, count int) {
 	if count <= 0 || count > 64 {
 		panic("slip39: BitStream Write count must be in [1, 64]")
@@ -63,8 +63,8 @@ func newBitStreamReader(data []byte, totalBits int) *bitStreamReader {
 }
 
 // Read reads count bits from the stream and returns them as a uint64.
-// Returns io.ErrUnexpectedEOF if not enough bits remain (F163).
-// count must be in [1, 64] (F282).
+// Returns io.ErrUnexpectedEOF if not enough bits remain.
+// count must be in [1, 64].
 func (r *bitStreamReader) Read(count int) (uint64, error) {
 	if count <= 0 || count > 64 {
 		panic("slip39: BitStream Read count must be in [1, 64]")

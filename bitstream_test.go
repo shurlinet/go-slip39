@@ -91,7 +91,7 @@ func TestBitStreamMixedWidths(t *testing.T) {
 	}
 }
 
-// TestBitStreamReadPastEnd verifies EOF behavior (F163).
+// TestBitStreamReadPastEnd verifies EOF behavior.
 func TestBitStreamReadPastEnd(t *testing.T) {
 	w := newBitStreamWriter(10)
 	w.Write(100, 10)
@@ -118,7 +118,7 @@ func TestBitStreamRemaining(t *testing.T) {
 	}
 }
 
-// TestBitStreamWriteCountPanic verifies panic on invalid count (F281).
+// TestBitStreamWriteCountPanic verifies panic on invalid count.
 func TestBitStreamWriteCountPanic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
@@ -129,7 +129,7 @@ func TestBitStreamWriteCountPanic(t *testing.T) {
 	w.Write(0, 0) // should panic
 }
 
-// TestBitStreamWriteCountOver64Panic verifies panic on count > 64 (F281).
+// TestBitStreamWriteCountOver64Panic verifies panic on count > 64.
 func TestBitStreamWriteCountOver64Panic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
@@ -140,7 +140,7 @@ func TestBitStreamWriteCountOver64Panic(t *testing.T) {
 	w.Write(0, 65) // should panic
 }
 
-// TestBitStreamReadCountPanic verifies panic on invalid count (F282).
+// TestBitStreamReadCountPanic verifies panic on invalid count.
 func TestBitStreamReadCountPanic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {

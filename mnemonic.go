@@ -171,6 +171,7 @@ func encodeShare(s *shareData) string {
 	dataWordCount := idExpLengthWords + 2 + valueWordCount
 	shareDataWords := make([]int, dataWordCount)
 	r := newBitStreamReader(w.Bytes(), dataBits)
+	defer ZeroBytes(w.Bytes()) // Zero BitStream buffer containing share value.
 	for i := range shareDataWords {
 		v, err := r.Read(radixBits)
 		if err != nil {
@@ -286,6 +287,7 @@ func decodeMnemonic(mnemonic string) (*shareData, error) {
 	for _, wi := range valueWords {
 		bw.Write(uint64(wi), radixBits)
 	}
+	defer ZeroBytes(bw.Bytes()) // Zero BitStream buffer containing share value.
 
 	// Read and verify padding bits are zero.
 	br := newBitStreamReader(bw.Bytes(), totalValueBits)

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Satinderjit Singh
 // SPDX-License-Identifier: MIT
-//
+
 // Package slip39 implements SLIP-0039: Shamir's Secret Sharing for Mnemonic Codes.
 //
 // Split splits a secret into mnemonic shares using a two-level (group + member) Shamir
@@ -247,10 +247,22 @@ func Combine(mnemonics []string, passphrase []byte) ([]byte, error) {
 	for i, m := range mnemonics {
 		sd, err := decodeMnemonic(m)
 		if err != nil {
+			// Zero already-decoded share values before returning.
+			for j := 0; j < i; j++ {
+				ZeroBytes(shares[j].value)
+			}
 			return nil, fmt.Errorf("mnemonic %d: %w", i, err)
 		}
 		shares[i] = sd
 	}
+	// Zero all decoded share values when Combine returns (success or error).
+	defer func() {
+		for _, sd := range shares {
+			if sd != nil {
+				ZeroBytes(sd.value)
+			}
+		}
+	}()
 
 	// Verify common parameters match across all shares (id, ext, e, GT, G, value length).
 	ref := shares[0]

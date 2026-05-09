@@ -18,7 +18,7 @@ const maxSecretLen = 64
 // Each element r[i] holds bit i of every input byte packed into bit positions 0..len(x)-1.
 // r is zeroed first, so len(x) < 64 is safe (high positions remain zero).
 func bitslice(r *[8]uint64, x []byte) {
-	*r = [8]uint64{} // F296: zero first, ensures high bits clean on re-use.
+	*r = [8]uint64{} // Zero first, ensures high bits clean on re-use.
 	for arrIdx := 0; arrIdx < len(x); arrIdx++ {
 		cur := uint64(x[arrIdx])
 		for bitIdx := 0; bitIdx < 8; bitIdx++ {
@@ -45,7 +45,7 @@ func unbitslice(r []byte, x *[8]uint64) {
 // Used to create a constant across the entire bit-parallel width.
 func bitsliceSetAll(r *[8]uint64, x byte) {
 	for idx := 0; idx < 8; idx++ {
-		r[idx] = -uint64((x >> idx) & 1) // F245: two's complement, all 64 bits set or clear.
+		r[idx] = -uint64((x >> idx) & 1) // Two's complement, all 64 bits set or clear.
 	}
 }
 
@@ -63,7 +63,7 @@ func gf256Add(r *[8]uint64, x *[8]uint64) {
 // r and b produces an incorrect result. Use gf256Square for squaring.
 func gf256Mul(r *[8]uint64, a *[8]uint64, b *[8]uint64) {
 	// Copy a to a2 so we can modify it during reduction.
-	// This is the mechanical safety for r==a aliasing (F56, F169).
+	// This is the mechanical safety for r==a aliasing.
 	a2 := *a
 
 	r[0] = a2[0] & b[0]
@@ -159,7 +159,7 @@ func gf256Mul(r *[8]uint64, a *[8]uint64, b *[8]uint64) {
 	r[6] ^= a2[7] & b[7]
 	r[7] ^= a2[0] & b[7]
 
-	ZeroUint64Array(&a2)
+	zeroUint64Array(&a2)
 }
 
 // gf256Square squares x in GF(2^8) and writes the result to r.
@@ -169,7 +169,7 @@ func gf256Mul(r *[8]uint64, a *[8]uint64, b *[8]uint64) {
 // Note: local variables r14, r12, r10, r8 hold secret bit-plane data on the stack.
 // Go does not provide a mechanism to zero stack variables on return. This matches
 // Trezor C's behavior (stack temporaries are not memzeroed in gf256_square either).
-// The caller (gf256Inv) zeroes its own heap-allocated intermediates via ZeroUint64Array.
+// The caller (gf256Inv) zeroes its own heap-allocated intermediates via zeroUint64Array.
 func gf256Square(r *[8]uint64, x *[8]uint64) {
 	r14 := x[7]
 	r12 := x[6]
@@ -221,6 +221,6 @@ func gf256Inv(r *[8]uint64, x *[8]uint64) {
 	gf256Mul(r, r, &z)   // r = x^250
 	gf256Mul(r, r, &y)   // r = x^254
 
-	ZeroUint64Array(&y)
-	ZeroUint64Array(&z)
+	zeroUint64Array(&y)
+	zeroUint64Array(&z)
 }

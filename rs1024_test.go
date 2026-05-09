@@ -83,7 +83,7 @@ func TestRS1024InvalidChecksum(t *testing.T) {
 }
 
 // TestRS1024ExhaustiveSingleErrorDetection verifies that flipping any single
-// word in a valid codeword to any other value is detected (F256).
+// word in a valid codeword to any other value is detected.
 // Uses spec vector 1 (20 words). Tests 20 * 1023 = 20,460 cases.
 func TestRS1024ExhaustiveSingleErrorDetection(t *testing.T) {
 	// Spec vector 1: all 20 word indices (verified against Python reference).
@@ -140,7 +140,7 @@ func TestRS1024WrongCustomizationString(t *testing.T) {
 }
 
 // TestRS1024CustomizationStringAntiTamper verifies the byte values of
-// customization strings (F266).
+// customization strings.
 func TestRS1024CustomizationStringAntiTamper(t *testing.T) {
 	expected := []byte{0x73, 0x68, 0x61, 0x6D, 0x69, 0x72} // "shamir"
 	actual := []byte(customizationStringOriginal)

@@ -15,7 +15,7 @@ import (
 
 const (
 	// baseIterationsPerRound is the base PBKDF2 iteration count per Feistel round.
-	// Spec formula: iterations = 2500 << iterationExponent (F246).
+	// Spec formula: iterations = 2500 << iterationExponent.
 	baseIterationsPerRound = 2500
 
 	// roundCount is the number of Feistel rounds.
@@ -33,19 +33,19 @@ const (
 // For extendable: empty (the identifier is not included).
 func getSalt(identifier int, extendable bool) []byte {
 	if extendable {
-		return []byte{} // F54: empty, not nil.
+		return []byte{} // Empty, not nil.
 	}
 	cs := []byte(customizationStringOriginal)
 	salt := make([]byte, len(cs)+2)
 	copy(salt, cs)
-	binary.BigEndian.PutUint16(salt[len(cs):], uint16(identifier)) // F110: big-endian.
+	binary.BigEndian.PutUint16(salt[len(cs):], uint16(identifier)) // Big-endian.
 	return salt
 }
 
 // encrypt applies the 4-round Feistel cipher to produce the Encrypted Master Secret.
 //
-// All intermediate buffers are pre-allocated and zeroed on exit (F291, F292).
-// The result is constructed via explicit make+copy to avoid append aliasing (F289).
+// All intermediate buffers are pre-allocated and zeroed on exit.
+// The result is constructed via explicit make+copy to avoid append aliasing.
 func encrypt(secret, passphrase []byte, iterationExponent, identifier int, extendable bool) []byte {
 	if len(secret) == 0 || len(secret)%2 != 0 {
 		panic("slip39: encrypt requires non-empty even-length secret")
@@ -53,7 +53,7 @@ func encrypt(secret, passphrase []byte, iterationExponent, identifier int, exten
 	if iterationExponent < 0 || iterationExponent > 15 {
 		panic("slip39: iteration exponent must be in [0, 15]")
 	}
-	// F275: normalize nil passphrase to empty for consistent PBKDF2 behavior.
+	// Normalize nil passphrase to empty for consistent PBKDF2 behavior.
 	if passphrase == nil {
 		passphrase = []byte{}
 	}
@@ -66,7 +66,7 @@ func encrypt(secret, passphrase []byte, iterationExponent, identifier int, exten
 	copy(l, secret[:half])
 	copy(r, secret[half:])
 
-	// Pre-allocate password and salt buffers (F291, F292).
+	// Pre-allocate password and salt buffers.
 	// Password = round_byte + passphrase.
 	password := make([]byte, 1+len(passphrase))
 	copy(password[1:], passphrase)
@@ -79,25 +79,25 @@ func encrypt(secret, passphrase []byte, iterationExponent, identifier int, exten
 	defer ZeroBytes(salt)
 
 	for i := 0; i < roundCount; i++ {
-		password[0] = byte(i) // F193: round byte, no collision with passphrase range.
+		password[0] = byte(i) // Round byte, no collision with passphrase range.
 		copy(salt[len(saltPrefix):], r)
 
-		// F293: assert PBKDF2 output length.
+		// Assert PBKDF2 output length.
 		f := pbkdf2.Key(password, salt, iterations, half, sha256.New)
 		if len(f) != half {
 			panic("slip39: pbkdf2.Key returned unexpected length")
 		}
 
-		// XOR l with f in-place (F100).
+		// XOR l with f in-place.
 		xorBytes(l, l, f)
-		ZeroBytes(f) // F290: zero each round.
+		ZeroBytes(f) // Zero each round.
 
 		// Swap l and r for next round.
 		l, r = r, l
 	}
 
-	// F289: explicit allocation, no append aliasing.
-	// After 4 rounds with final swap, result is r||l (Feistel convention, F109).
+	// Explicit allocation, no append aliasing.
+	// After 4 rounds with final swap, result is r||l (Feistel convention).
 	result := make([]byte, len(secret))
 	copy(result, r)
 	copy(result[half:], l)
@@ -116,7 +116,7 @@ func decrypt(ems, passphrase []byte, iterationExponent, identifier int, extendab
 	if iterationExponent < 0 || iterationExponent > 15 {
 		panic("slip39: iteration exponent must be in [0, 15]")
 	}
-	// F275: normalize nil passphrase to empty for consistent PBKDF2 behavior.
+	// Normalize nil passphrase to empty for consistent PBKDF2 behavior.
 	if passphrase == nil {
 		passphrase = []byte{}
 	}
@@ -156,7 +156,7 @@ func decrypt(ems, passphrase []byte, iterationExponent, identifier int, extendab
 		l, r = r, l
 	}
 
-	// F289: explicit allocation, output is r||l.
+	// Explicit allocation, output is r||l.
 	result := make([]byte, len(ems))
 	copy(result, r)
 	copy(result[half:], l)

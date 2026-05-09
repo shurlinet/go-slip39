@@ -52,7 +52,7 @@ func TestFeistelRoundTrip(t *testing.T) {
 	}
 }
 
-// TestFeistelPreservesLength verifies len(encrypt(s)) == len(s) (F53).
+// TestFeistelPreservesLength verifies len(encrypt(s)) == len(s).
 func TestFeistelPreservesLength(t *testing.T) {
 	for _, n := range []int{16, 18, 20, 24, 32, 48, 64} {
 		secret := make([]byte, n)
@@ -67,7 +67,7 @@ func TestFeistelPreservesLength(t *testing.T) {
 	}
 }
 
-// TestFeistelPythonVectors verifies against Python-generated intermediate vectors (F195).
+// TestFeistelPythonVectors verifies against Python-generated intermediate vectors.
 // Generated from trezor/python-shamir-mnemonic.
 func TestFeistelPythonVectors(t *testing.T) {
 	vectors := []struct {
@@ -136,7 +136,7 @@ func TestFeistelPythonVectors(t *testing.T) {
 	}
 }
 
-// TestGetSaltAntiTamper verifies getSalt output against Python-generated values (F223).
+// TestGetSaltAntiTamper verifies getSalt output against Python-generated values.
 func TestGetSaltAntiTamper(t *testing.T) {
 	tests := []struct {
 		id         int
@@ -157,7 +157,7 @@ func TestGetSaltAntiTamper(t *testing.T) {
 }
 
 // TestPBKDF2SHA256KnownVectors verifies x/crypto/pbkdf2 with HMAC-SHA256
-// against Python hashlib.pbkdf2_hmac output (F184). Pins our dependency behavior.
+// against Python hashlib.pbkdf2_hmac output. Pins our dependency behavior.
 func TestPBKDF2SHA256KnownVectors(t *testing.T) {
 	vectors := []struct {
 		password   string
@@ -180,7 +180,7 @@ func TestPBKDF2SHA256KnownVectors(t *testing.T) {
 	}
 }
 
-// TestHMACArgumentOrderAntiTamper verifies the HMAC argument order in createDigest (F60, F83).
+// TestHMACArgumentOrderAntiTamper verifies the HMAC argument order in createDigest.
 // key=randomPart, msg=sharedSecret. Swapping them produces a different digest.
 func TestHMACArgumentOrderAntiTamper(t *testing.T) {
 	randomPart := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
@@ -196,7 +196,7 @@ func TestHMACArgumentOrderAntiTamper(t *testing.T) {
 		t.Fatal("HMAC argument order doesn't matter for these inputs - test is invalid")
 	}
 
-	// F50: verify against independent HMAC computation using stdlib.
+	// Verify against independent HMAC computation using stdlib.
 	// This proves createDigest uses HMAC-SHA256(key=randomPart, msg=secret)[:4]
 	// and not the swapped argument order.
 	h := hmac.New(sha256.New, randomPart) // key = randomPart (explicit)
@@ -207,7 +207,7 @@ func TestHMACArgumentOrderAntiTamper(t *testing.T) {
 	}
 }
 
-// TestFeistelCiphertextNotPlaintext verifies encrypt produces different output (F85).
+// TestFeistelCiphertextNotPlaintext verifies encrypt produces different output.
 func TestFeistelCiphertextNotPlaintext(t *testing.T) {
 	secret := make([]byte, 16)
 	for i := range secret {
@@ -220,7 +220,7 @@ func TestFeistelCiphertextNotPlaintext(t *testing.T) {
 }
 
 // TestFeistelWrongPassphraseDifferentResult verifies that different passphrases
-// produce different ciphertexts (F178: plausible deniability by design).
+// produce different ciphertexts (plausible deniability by design).
 func TestFeistelWrongPassphraseDifferentResult(t *testing.T) {
 	secret, _ := hex.DecodeString("bb54aac4b89dc868ba37d9cc21b2cece")
 	ct1 := encrypt(secret, []byte("TREZOR"), 0, 7945, false)
@@ -231,7 +231,7 @@ func TestFeistelWrongPassphraseDifferentResult(t *testing.T) {
 }
 
 // TestFeistelNilPassphrase verifies nil passphrase behaves identically
-// to empty passphrase (F275 normalization).
+// to empty passphrase (nil normalization).
 func TestFeistelNilPassphrase(t *testing.T) {
 	secret, _ := hex.DecodeString("bb54aac4b89dc868ba37d9cc21b2cece")
 	ctNil := encrypt(secret, nil, 0, 7945, false)

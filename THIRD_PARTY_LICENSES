@@ -1,0 +1,37 @@
+This file lists the licenses of third-party code that influenced go-slip39.
+
+================================================================================
+Trezor firmware - crypto/shamir.c
+================================================================================
+
+The bitsliced GF(2^8) arithmetic in gf256.go is a mechanical translation of
+Daan Sprenkels' implementation from the Trezor firmware repository.
+
+Source: https://github.com/trezor/trezor-firmware/blob/main/crypto/shamir.c
+License: Apache License 2.0
+
+Copyright (c) SatoshiLabs
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+lontivero/Slip39 (C#)
+================================================================================
+
+The BitStream encoding approach in bitstream.go was inspired by the C# Slip39
+implementation by Lucas Ontivero.
+
+Source: https://github.com/lontivero/Slip39
+License: MIT
+
+Copyright (c) Lucas Ontivero

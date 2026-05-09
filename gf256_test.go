@@ -6,7 +6,7 @@ package slip39
 import "testing"
 
 // exp/log lookup tables for GF(2^8) with generator 3 and polynomial 0x11B.
-// These are the TEST ORACLE only; production code uses bitsliced arithmetic (F231).
+// These are the TEST ORACLE only; production code uses bitsliced arithmetic.
 var (
 	expTable [256]byte
 	logTable [256]byte
@@ -36,7 +36,7 @@ func tableMul(a, b byte) byte {
 }
 
 // TestGF256ExhaustiveBitslicedVsTable verifies bitsliced multiplication matches
-// table-based multiplication for all 256*256 = 65,536 input pairs (F196).
+// table-based multiplication for all 256*256 = 65,536 input pairs.
 func TestGF256ExhaustiveBitslicedVsTable(t *testing.T) {
 	for a := 0; a < 256; a++ {
 		for b := 0; b < 256; b++ {
@@ -57,7 +57,7 @@ func TestGF256ExhaustiveBitslicedVsTable(t *testing.T) {
 }
 
 // TestGF256ExpLogSelfConsistency verifies exp[log[x]] == x for all x in 1..255,
-// and log[exp[i]] == i for all i in 0..254 (F257).
+// and log[exp[i]] == i for all i in 0..254.
 func TestGF256ExpLogSelfConsistency(t *testing.T) {
 	for x := 1; x < 256; x++ {
 		if expTable[logTable[x]] != byte(x) {
@@ -72,7 +72,7 @@ func TestGF256ExpLogSelfConsistency(t *testing.T) {
 }
 
 // TestGF256GeneratorVerification verifies the generator is 3:
-// exp[i+1] == exp[i] * 3 for all i in 0..253 (F257).
+// exp[i+1] == exp[i] * 3 for all i in 0..253.
 func TestGF256GeneratorVerification(t *testing.T) {
 	for i := 0; i < 254; i++ {
 		product := tableMul(expTable[i], 3)
@@ -83,7 +83,7 @@ func TestGF256GeneratorVerification(t *testing.T) {
 }
 
 // TestGF256AntiTamperAnchors verifies specific exp/log table values
-// to detect polynomial tampering (F182).
+// to detect polynomial tampering.
 func TestGF256AntiTamperAnchors(t *testing.T) {
 	// AES polynomial 0x11B with generator 3.
 	checks := []struct {
@@ -103,7 +103,7 @@ func TestGF256AntiTamperAnchors(t *testing.T) {
 	}
 }
 
-// TestGF256MulAliasingSafe verifies r==a aliasing produces correct results (F56).
+// TestGF256MulAliasingSafe verifies r==a aliasing produces correct results.
 func TestGF256MulAliasingSafe(t *testing.T) {
 	for a := byte(1); a != 0; a++ { // 1..255
 		for b := byte(1); b != 0; b++ {
@@ -125,7 +125,7 @@ func TestGF256MulAliasingSafe(t *testing.T) {
 }
 
 // TestGF256MulAliasingRBUnsafe demonstrates that r==b aliasing produces
-// incorrect results, confirming the documented constraint (F169).
+// incorrect results, confirming the documented constraint.
 func TestGF256MulAliasingRBUnsafe(t *testing.T) {
 	// Pick values where tableMul gives a non-trivial result.
 	a, b := byte(7), byte(13)
@@ -154,7 +154,7 @@ func TestGF256MulAliasingRBUnsafe(t *testing.T) {
 			t.Log("r==b aliasing happened to produce correct results for tested pairs; constraint still documented")
 		}
 	}
-	// This test documents the constraint. The important thing is F56/F169 documentation.
+	// This test documents the constraint. The important thing is the aliasing documentation.
 }
 
 // TestGF256SquareExhaustive verifies squaring matches mul(x,x) for all 256 values.
@@ -308,7 +308,7 @@ func TestBitsliceRoundTrip(t *testing.T) {
 }
 
 // TestBitsliceReUseHighBits verifies that calling bitslice with a shorter input
-// on the same array clears high bit positions (F296).
+// on the same array clears high bit positions.
 func TestBitsliceReUseHighBits(t *testing.T) {
 	var bs [8]uint64
 
@@ -358,7 +358,7 @@ func TestBitsliceSetAll(t *testing.T) {
 	}
 }
 
-// TestZeroBytesActuallyZeros verifies ZeroBytes sets all bytes to zero (F91, F291).
+// TestZeroBytesActuallyZeros verifies ZeroBytes sets all bytes to zero.
 func TestZeroBytesActuallyZeros(t *testing.T) {
 	buf := []byte{1, 2, 3, 4, 5, 255, 128, 64}
 	ZeroBytes(buf)
@@ -369,18 +369,18 @@ func TestZeroBytesActuallyZeros(t *testing.T) {
 	}
 }
 
-// TestZeroBytesNil verifies ZeroBytes handles nil safely (F173).
+// TestZeroBytesNil verifies ZeroBytes handles nil safely.
 func TestZeroBytesNil(t *testing.T) {
 	ZeroBytes(nil) // must not panic
 }
 
-// TestZeroUint64ArrayActuallyZeros verifies ZeroUint64Array clears all elements.
-func TestZeroUint64ArrayActuallyZeros(t *testing.T) {
+// TestZeroUint64Array verifies zeroUint64Array clears all elements.
+func TestZeroUint64Array(t *testing.T) {
 	arr := [8]uint64{1, 2, 3, 4, 5, 6, 7, 8}
-	ZeroUint64Array(&arr)
+	zeroUint64Array(&arr)
 	for i, v := range arr {
 		if v != 0 {
-			t.Fatalf("ZeroUint64Array: index %d = %d, want 0", i, v)
+			t.Fatalf("zeroUint64Array: index %d = %d, want 0", i, v)
 		}
 	}
 }

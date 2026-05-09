@@ -1,0 +1,87 @@
+[
+  {
+    "description": "1-of-1 128-bit e=0 ext=false",
+    "master_secret": "bb54aac4b89dc868ba37d9cc21b2cece",
+    "passphrase": "TREZOR",
+    "iteration_exponent": 0,
+    "extendable": false,
+    "group_threshold": 1,
+    "groups": [{"threshold": 1, "count": 1}],
+    "mnemonics": [
+      "intend painting academic academic ancestor pulse speak lilac jump keyboard island pecan firm firm taste august hand false advance careful"
+    ]
+  },
+  {
+    "description": "2-of-3 128-bit e=0 ext=false",
+    "master_secret": "bb54aac4b89dc868ba37d9cc21b2cece",
+    "passphrase": "TREZOR",
+    "iteration_exponent": 0,
+    "extendable": false,
+    "group_threshold": 1,
+    "groups": [{"threshold": 2, "count": 3}],
+    "mnemonics": [
+      "glasses extend academic acid armed dining pregnant resident inside trust skunk fangs package expect magazine eyebrow orange morning unfold punish",
+      "glasses extend academic agency dramatic gross shaft involve step warn total western galaxy category decrease mountain response western costume member",
+      "glasses extend academic always cover mountain gray depart priority slice very parking syndrome military wealthy superior ocean paces ranked briefing"
+    ]
+  },
+  {
+    "description": "1-of-1 256-bit e=0 ext=false",
+    "master_secret": "bb54aac4b89dc868ba37d9cc21b2cecebb54aac4b89dc868ba37d9cc21b2cece",
+    "passphrase": "TREZOR",
+    "iteration_exponent": 0,
+    "extendable": false,
+    "group_threshold": 1,
+    "groups": [{"threshold": 1, "count": 1}],
+    "mnemonics": [
+      "spark garden academic academic already ending listen guest privacy spirit cards trend island primary maximum emerald heat cards huge writing starting slim smirk making exercise headset hour science aircraft likely amazing cricket order"
+    ]
+  },
+  {
+    "description": "1-of-1 128-bit e=0 ext=true",
+    "master_secret": "bb54aac4b89dc868ba37d9cc21b2cece",
+    "passphrase": "TREZOR",
+    "iteration_exponent": 0,
+    "extendable": true,
+    "group_threshold": 1,
+    "groups": [{"threshold": 1, "count": 1}],
+    "mnemonics": [
+      "guitar regret academic academic drove join squeeze ultimate script elbow smug guard type crystal making owner security tidy display leaves"
+    ]
+  },
+  {
+    "description": "3-of-5 128-bit e=0 ext=false no-passphrase",
+    "master_secret": "bb54aac4b89dc868ba37d9cc21b2cece",
+    "passphrase": "",
+    "iteration_exponent": 0,
+    "extendable": false,
+    "group_threshold": 1,
+    "groups": [{"threshold": 3, "count": 5}],
+    "mnemonics": [
+      "smell senior academic acne clothes papa emperor crucial music ajar hand display include chest maiden inside curly floral response angry",
+      "smell senior academic agree cover best talent arcade adorn equation teaspoon brave equation teacher muscle scatter program afraid threaten seafood",
+      "smell senior academic amazing deadline makeup huge facility cubic romantic alien both pregnant salary victim sweater nail race fact nail",
+      "smell senior academic arcade center dish vintage iris relate verify mayor diagnose muscle acid twin home blimp universe analysis founder",
+      "smell senior academic axle crush response inside budget parcel testify vocal cluster increase capture reject daughter pregnant furl curious talent"
+    ]
+  },
+  {
+    "description": "2-of-2 groups 128-bit e=0 ext=false",
+    "master_secret": "bb54aac4b89dc868ba37d9cc21b2cece",
+    "passphrase": "TREZOR",
+    "iteration_exponent": 0,
+    "extendable": false,
+    "group_threshold": 2,
+    "groups": [{"threshold": 2, "count": 3}, {"threshold": 1, "count": 1}],
+    "mnemonics_by_group": [
+      [
+        "editor stay acrobat echo acrobat believe modify emperor carbon plunge party review boundary venture perfect machine parking unhappy dryer injury",
+        "editor stay acrobat email arena knife spill speak infant failure hand response merit genius response predator general force garden junk",
+        "editor stay acrobat entrance bulb skin inherit strategy marathon engage friendly aunt branch skin music single cause woman charity ecology"
+      ],
+      [
+        "editor stay beard easy argue aspect teammate campus unfair diet pistol deadline silver realize fiscal taxi humidity exercise emphasis paid"
+      ]
+    ]
+  }
+]

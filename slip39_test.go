@@ -72,7 +72,7 @@ func loadVectors(t *testing.T) []vectorEntry {
 	return vectors
 }
 
-// vectorErrorMap maps vector indices (1-based) to expected error sentinels (F198).
+// vectorErrorMap maps vector indices (1-based) to expected error sentinels.
 // Empty masterHex means expected failure. Each failure maps to a specific error type.
 var vectorErrorMap = map[int]error{
 	2:  ErrInvalidChecksum,  // invalid checksum
@@ -114,7 +114,7 @@ func TestSpecVectors(t *testing.T) {
 		t.Fatalf("expected 45 vectors, got %d", len(vectors))
 	}
 
-	passphrase := []byte("TREZOR") // F105: all spec vectors use "TREZOR"
+	passphrase := []byte("TREZOR") // All spec vectors use "TREZOR".
 
 	for i, v := range vectors {
 		vecNum := i + 1 // 1-based
@@ -126,7 +126,7 @@ func TestSpecVectors(t *testing.T) {
 				if err == nil {
 					t.Fatalf("expected error, got success with result %x", result)
 				}
-				// Verify specific error type (F198).
+				// Verify specific error type.
 				expectedErr, ok := vectorErrorMap[vecNum]
 				if ok && !errors.Is(err, expectedErr) {
 					t.Errorf("expected error wrapping %v, got: %v", expectedErr, err)
@@ -252,7 +252,7 @@ func TestRoundTrip256Bit(t *testing.T) {
 	}
 }
 
-// F273: test both spec-mandated lengths explicitly.
+// Test both spec-mandated lengths explicitly.
 func TestSplit128BitSecret(t *testing.T) {
 	secret := bytes.Repeat([]byte{0xAB}, 16)
 	groups, err := Split(secret, nil, WithIterationExponent(0))
@@ -359,9 +359,9 @@ func TestSplitValidation(t *testing.T) {
 		{"secret too short", bytes.Repeat([]byte{1}, 14), nil, nil, ErrInvalidSecret},
 		{"secret odd length", bytes.Repeat([]byte{1}, 17), nil, nil, ErrInvalidSecret},
 		{"secret too long", bytes.Repeat([]byte{1}, 66), nil, nil, ErrInvalidSecret},
-		{"passphrase non-ASCII", secret16, []byte{0x7F}, nil, ErrInvalidPassphrase},    // F165: DEL
+		{"passphrase non-ASCII", secret16, []byte{0x7F}, nil, ErrInvalidPassphrase},    // DEL
 		{"passphrase control char", secret16, []byte{0x01}, nil, ErrInvalidPassphrase},
-		{"passphrase UTF-8 multi", secret16, []byte{0xC0, 0x80}, nil, ErrInvalidPassphrase}, // F207
+		{"passphrase UTF-8 multi", secret16, []byte{0xC0, 0x80}, nil, ErrInvalidPassphrase},
 		{"iteration exponent negative", secret16, nil, []Option{WithIterationExponent(-1)}, ErrInvalidShares},
 		{"iteration exponent too high", secret16, nil, []Option{WithIterationExponent(16)}, ErrInvalidShares},
 		{"no groups", secret16, nil, []Option{WithGroups(nil)}, ErrInvalidShares},
@@ -382,7 +382,7 @@ func TestSplitValidation(t *testing.T) {
 		}, ErrInvalidShares},
 		{"threshold 1 count > 1", secret16, nil, []Option{
 			WithGroups([]Group{{1, 3}}),
-		}, ErrInvalidShares}, // F16
+		}, ErrInvalidShares},
 	}
 
 	for _, tt := range tests {
@@ -423,7 +423,7 @@ func TestCombineValidation(t *testing.T) {
 // --- Entropy Verification Tests ---
 
 func TestSplitNonDeterministic(t *testing.T) {
-	// F208: each Split call produces different shares.
+	// Each Split call produces different shares.
 	secret := bytes.Repeat([]byte{0x42}, 16)
 
 	groups1, err := Split(secret, nil, WithIterationExponent(0))
@@ -441,7 +441,7 @@ func TestSplitNonDeterministic(t *testing.T) {
 }
 
 func TestSplitDoesNotModifySecret(t *testing.T) {
-	// F191: Split must not modify the caller's secret slice.
+	// Split must not modify the caller's secret slice.
 	secret := bytes.Repeat([]byte{0x42}, 16)
 	original := make([]byte, len(secret))
 	copy(original, secret)
@@ -456,7 +456,7 @@ func TestSplitDoesNotModifySecret(t *testing.T) {
 	}
 }
 
-// --- Concurrent Safety Tests (F189, F190) ---
+// --- Concurrent Safety Tests ---
 
 func TestConcurrentSplit(t *testing.T) {
 	secret := bytes.Repeat([]byte{0x42}, 16)
@@ -492,7 +492,7 @@ func TestConcurrentSplit(t *testing.T) {
 
 // --- Encode/Decode Round-Trip Tests ---
 
-// F210: every share produced by Split round-trips through encode/decode.
+// Every share produced by Split round-trips through encode/decode.
 func TestEncodeDecodeRoundTrip(t *testing.T) {
 	secret := make([]byte, 32)
 	if _, err := rand.Read(secret); err != nil {
@@ -525,7 +525,7 @@ func TestEncodeDecodeRoundTrip(t *testing.T) {
 	}
 }
 
-// F201: identifier encoding round-trip.
+// Identifier encoding round-trip.
 func TestIdentifierRoundTrip(t *testing.T) {
 	secret := bytes.Repeat([]byte{0x42}, 16)
 
@@ -547,7 +547,7 @@ func TestIdentifierRoundTrip(t *testing.T) {
 	}
 }
 
-// --- Shuffled Order Test (F202) ---
+// --- Shuffled Order Test ---
 
 func TestShuffledMnemonicOrder(t *testing.T) {
 	secret := make([]byte, 16)
@@ -576,7 +576,7 @@ func TestShuffledMnemonicOrder(t *testing.T) {
 	}
 }
 
-// --- Max Configuration Test (F200) ---
+// --- Max Configuration Test ---
 
 func TestMaxConfiguration16of16(t *testing.T) {
 	secret := make([]byte, 16)
@@ -608,7 +608,7 @@ func TestMaxConfiguration16of16(t *testing.T) {
 	}
 }
 
-// --- First Two Words Property (F274) ---
+// --- First Two Words Property ---
 
 func TestFirstTwoWordsSame(t *testing.T) {
 	secret := make([]byte, 16)
@@ -634,7 +634,7 @@ func TestFirstTwoWordsSame(t *testing.T) {
 	}
 }
 
-// --- Wordlist Tests (F278) ---
+// --- Wordlist Tests ---
 
 func TestWordlistProperties(t *testing.T) {
 	t.Run("count", func(t *testing.T) {
@@ -692,7 +692,7 @@ func TestDecodeUnknownWord(t *testing.T) {
 	}
 }
 
-// --- All-Zero Secret Test (F159) ---
+// --- All-Zero Secret Test ---
 
 func TestAllZeroSecret(t *testing.T) {
 	secret := make([]byte, 16) // all zeros
@@ -710,7 +710,7 @@ func TestAllZeroSecret(t *testing.T) {
 	}
 }
 
-// --- All-FF Secret Test (F186) ---
+// --- All-FF Secret Test ---
 
 func TestAllFFSecret(t *testing.T) {
 	secret := bytes.Repeat([]byte{0xFF}, 16)
@@ -728,7 +728,7 @@ func TestAllFFSecret(t *testing.T) {
 	}
 }
 
-// --- Wrong Passphrase Test (F178) ---
+// --- Wrong Passphrase Test ---
 
 func TestWrongPassphraseProducesDifferentSecret(t *testing.T) {
 	secret := make([]byte, 16)
@@ -792,7 +792,7 @@ func TestExtendableFlag(t *testing.T) {
 // --- Threshold Property Tests ---
 
 func TestThresholdMinusOneFails(t *testing.T) {
-	// F117: k-1 shares should fail.
+	// k-1 shares should fail.
 	secret := make([]byte, 16)
 	if _, err := rand.Read(secret); err != nil {
 		t.Fatal(err)
@@ -814,7 +814,7 @@ func TestThresholdMinusOneFails(t *testing.T) {
 	}
 }
 
-// --- Mix Shares from Different Splits (F160) ---
+// --- Mix Shares from Different Splits ---
 
 func TestMixSharesFromDifferentSplits(t *testing.T) {
 	secret := make([]byte, 16)
@@ -845,7 +845,7 @@ func TestMixSharesFromDifferentSplits(t *testing.T) {
 	}
 }
 
-// --- secrets.json Round-Trip Tests (F108) ---
+// --- secrets.json Round-Trip Tests ---
 
 type secretEntry struct {
 	Description      string `json:"description"`
@@ -924,7 +924,7 @@ func TestSecretsRoundTrip(t *testing.T) {
 	}
 }
 
-// --- Empty Secret Test (F158) ---
+// --- Empty Secret Test ---
 
 func TestSplitEmptySecret(t *testing.T) {
 	_, err := Split(nil, nil)
@@ -937,7 +937,7 @@ func TestSplitEmptySecret(t *testing.T) {
 	}
 }
 
-// --- Excess Shares Test (F162) ---
+// --- Excess Shares Test ---
 
 func TestExcessSharesRejected(t *testing.T) {
 	secret := make([]byte, 16)
@@ -964,7 +964,7 @@ func TestExcessSharesRejected(t *testing.T) {
 	}
 }
 
-// --- Threshold Encoding Anti-Tamper Test (F264) ---
+// --- Threshold Encoding Anti-Tamper Test ---
 
 func TestThresholdEncodingAntiTamper(t *testing.T) {
 	secret := bytes.Repeat([]byte{0x42}, 16)
@@ -1005,7 +1005,7 @@ func TestThresholdEncodingAntiTamper(t *testing.T) {
 	}
 }
 
-// --- Customization String Anti-Tamper Test (F266) ---
+// --- Customization String Anti-Tamper Test ---
 
 func TestCustomizationStringAntiTamper(t *testing.T) {
 	// Verify the customization string constants match their expected byte values.
@@ -1022,7 +1022,7 @@ func TestCustomizationStringAntiTamper(t *testing.T) {
 	}
 }
 
-// --- 16 Groups of 1-of-1 Test (F200) ---
+// --- 16 Groups of 1-of-1 Test ---
 
 func TestMaxConfiguration16GroupsOf1(t *testing.T) {
 	secret := make([]byte, 16)
@@ -1065,7 +1065,7 @@ func TestMaxConfiguration16GroupsOf1(t *testing.T) {
 	}
 }
 
-// --- Exhaustive Combination Test (F118) ---
+// --- Exhaustive Combination Test ---
 
 func TestExhaustiveCombinations3of5(t *testing.T) {
 	secret := make([]byte, 16)
@@ -1229,6 +1229,458 @@ func TestDecodeCrossImpl(t *testing.T) {
 				t.Errorf("value:\n  got:  %x\n  want: %x", sd.value, expectedValue)
 			}
 		})
+	}
+}
+
+// --- Cross-Implementation Tests (Python-generated vectors) ---
+
+type crossImplVector struct {
+	Description       string           `json:"description"`
+	MasterSecret      string           `json:"master_secret"`
+	Passphrase        string           `json:"passphrase"`
+	IterationExponent int              `json:"iteration_exponent"`
+	Extendable        bool             `json:"extendable"`
+	GroupThreshold    int              `json:"group_threshold"`
+	Groups            []crossImplGroup `json:"groups"`
+	Mnemonics         []string         `json:"mnemonics,omitempty"`
+	MnemonicsByGroup  [][]string       `json:"mnemonics_by_group,omitempty"`
+}
+
+type crossImplGroup struct {
+	Threshold int `json:"threshold"`
+	Count     int `json:"count"`
+}
+
+func loadCrossImplVectors(t *testing.T) []crossImplVector {
+	t.Helper()
+	data, err := os.ReadFile("testdata/crossimpl.json")
+	if err != nil {
+		t.Fatalf("reading crossimpl.json: %v", err)
+	}
+	var vectors []crossImplVector
+	if err := json.Unmarshal(data, &vectors); err != nil {
+		t.Fatalf("parsing crossimpl.json: %v", err)
+	}
+	return vectors
+}
+
+func TestCrossImplVectors(t *testing.T) {
+	vectors := loadCrossImplVectors(t)
+	if len(vectors) == 0 {
+		t.Fatal("no cross-impl vectors loaded")
+	}
+
+	for _, v := range vectors {
+		t.Run(v.Description, func(t *testing.T) {
+			expectedSecret, err := hex.DecodeString(v.MasterSecret)
+			if err != nil {
+				t.Fatalf("invalid hex: %v", err)
+			}
+
+			// Collect mnemonics: flat list or by-group.
+			var mnemonics []string
+			if len(v.Mnemonics) > 0 {
+				// For single-group or flat, take threshold shares.
+				threshold := v.Groups[0].Threshold
+				if len(v.Mnemonics) < threshold {
+					t.Fatalf("not enough mnemonics: %d < %d", len(v.Mnemonics), threshold)
+				}
+				mnemonics = v.Mnemonics[:threshold]
+			} else if len(v.MnemonicsByGroup) > 0 {
+				// Multi-group: take threshold shares from each group.
+				for gi, group := range v.MnemonicsByGroup {
+					threshold := v.Groups[gi].Threshold
+					mnemonics = append(mnemonics, group[:threshold]...)
+				}
+			}
+
+			recovered, err := Combine(mnemonics, []byte(v.Passphrase))
+			if err != nil {
+				t.Fatalf("Combine failed: %v", err)
+			}
+			defer ZeroBytes(recovered)
+
+			if !bytes.Equal(recovered, expectedSecret) {
+				t.Errorf("master secret mismatch:\ngot:  %x\nwant: %x", recovered, expectedSecret)
+			}
+		})
+	}
+}
+
+// --- Share Independence Property Test ---
+
+func TestShareIndependence(t *testing.T) {
+	// Verify that no single share reveals any information about the secret.
+	// Each pair of shares that doesn't meet threshold should fail.
+	secret := make([]byte, 16)
+	if _, err := rand.Read(secret); err != nil {
+		t.Fatal(err)
+	}
+
+	groups, err := Split(secret, nil,
+		WithGroups([]Group{{Threshold: 3, Count: 5}}),
+		WithIterationExponent(0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 0; i < 5; i++ {
+		for j := i + 1; j < 5; j++ {
+			pair := []string{groups[0][i], groups[0][j]}
+			_, err := Combine(pair, nil)
+			if err == nil {
+				t.Errorf("shares [%d,%d] should fail with threshold=3", i, j)
+			}
+		}
+	}
+}
+
+// --- Determinism Property Test ---
+
+func TestDeterminismWithFixedRNG(t *testing.T) {
+	// Verify that Split with the same secret, passphrase, options, and
+	// random source always produces identical output.
+	secret := bytes.Repeat([]byte{0x42}, 32)
+
+	makeSeed := func() []byte {
+		seed := make([]byte, 512)
+		for i := range seed {
+			seed[i] = byte(i * 7)
+		}
+		return seed
+	}
+
+	configs := []struct {
+		name string
+		opts []Option
+	}{
+		{"1-of-1", []Option{WithIterationExponent(0)}},
+		{"2-of-3", []Option{
+			WithGroups([]Group{{Threshold: 2, Count: 3}}),
+			WithIterationExponent(0),
+		}},
+		{"multigroup", []Option{
+			WithGroupThreshold(2),
+			WithGroups([]Group{{Threshold: 2, Count: 3}, {Threshold: 1, Count: 1}}),
+			WithIterationExponent(0),
+			WithExtendable(true),
+		}},
+	}
+
+	for _, cfg := range configs {
+		t.Run(cfg.name, func(t *testing.T) {
+			// Copy base opts to avoid append aliasing across calls.
+			base1 := make([]Option, len(cfg.opts))
+			copy(base1, cfg.opts)
+			base2 := make([]Option, len(cfg.opts))
+			copy(base2, cfg.opts)
+			opts1 := append(base1, WithRandom(bytes.NewReader(makeSeed())))
+			opts2 := append(base2, WithRandom(bytes.NewReader(makeSeed())))
+
+			g1, err := Split(secret, []byte("pass"), opts1...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			g2, err := Split(secret, []byte("pass"), opts2...)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if len(g1) != len(g2) {
+				t.Fatalf("group count mismatch: %d vs %d", len(g1), len(g2))
+			}
+			for gi := range g1 {
+				if len(g1[gi]) != len(g2[gi]) {
+					t.Fatalf("group %d share count mismatch", gi)
+				}
+				for si := range g1[gi] {
+					if g1[gi][si] != g2[gi][si] {
+						t.Errorf("group %d share %d differs", gi, si)
+					}
+				}
+			}
+		})
+	}
+}
+
+// --- Error Message Secret-Leak Scan ---
+
+func TestErrorMessagesNoSecretLeak(t *testing.T) {
+	// Verify that error messages never contain secret byte values.
+	secret := []byte{0xDE, 0xAD, 0xBE, 0xEF, 0x42, 0x42, 0x42, 0x42,
+		0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42}
+	secretHex := hex.EncodeToString(secret)
+
+	// Generate valid shares for Combine error paths.
+	validGroups, err := Split(secret, nil,
+		WithGroups([]Group{{Threshold: 2, Count: 3}}),
+		WithIterationExponent(0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	errorCases := []struct {
+		name string
+		fn   func() error
+	}{
+		// Split error paths.
+		{"split/short secret", func() error { _, err := Split(secret[:14], nil); return err }},
+		{"split/odd secret", func() error { _, err := Split(secret[:15], nil); return err }},
+		{"split/bad passphrase", func() error { _, err := Split(secret, []byte{0x00}); return err }},
+		{"split/bad threshold", func() error {
+			_, err := Split(secret, nil, WithGroupThreshold(0))
+			return err
+		}},
+		// Combine error paths.
+		{"combine/empty", func() error { _, err := Combine(nil, nil); return err }},
+		{"combine/bad passphrase", func() error {
+			_, err := Combine(validGroups[0][:2], []byte{0x00})
+			return err
+		}},
+		{"combine/insufficient shares", func() error {
+			_, err := Combine(validGroups[0][:1], nil)
+			return err
+		}},
+		{"combine/excess shares", func() error {
+			_, err := Combine(validGroups[0], nil) // 3 shares, threshold 2
+			return err
+		}},
+	}
+
+	for _, tc := range errorCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.fn()
+			if err == nil {
+				return
+			}
+			errStr := err.Error()
+			// Full hex of secret must never appear.
+			if strings.Contains(errStr, secretHex) {
+				t.Errorf("error message contains secret hex: %s", errStr)
+			}
+			// Individual distinctive secret bytes must not appear as hex pairs.
+			for _, pair := range []string{"dead", "beef"} {
+				if strings.Contains(strings.ToLower(errStr), pair) {
+					t.Errorf("error message contains secret byte pair %q: %s", pair, errStr)
+				}
+			}
+		})
+	}
+}
+
+// --- Benchmarks ---
+
+func BenchmarkSplit128(b *testing.B) {
+	secret := bytes.Repeat([]byte{0x42}, 16)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		groups, _ := Split(secret, nil, WithIterationExponent(0))
+		_ = groups
+	}
+}
+
+func BenchmarkSplit256(b *testing.B) {
+	secret := bytes.Repeat([]byte{0x42}, 32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		groups, _ := Split(secret, nil, WithIterationExponent(0))
+		_ = groups
+	}
+}
+
+func BenchmarkCombine128(b *testing.B) {
+	secret := bytes.Repeat([]byte{0x42}, 16)
+	groups, _ := Split(secret, nil, WithIterationExponent(0))
+	mnemonics := groups[0]
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		result, _ := Combine(mnemonics, nil)
+		ZeroBytes(result)
+	}
+}
+
+func BenchmarkCombine256(b *testing.B) {
+	secret := bytes.Repeat([]byte{0x42}, 32)
+	groups, _ := Split(secret, nil, WithIterationExponent(0))
+	mnemonics := groups[0]
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		result, _ := Combine(mnemonics, nil)
+		ZeroBytes(result)
+	}
+}
+
+// --- AI Threat Defense Tests ---
+//
+// These tests detect specific, plausible sabotage patterns that a compromised
+// AI code-generation session could introduce. Each test recomputes expected
+// values independently rather than trusting any constant in production code.
+
+// TestAIDefenseFeistelRoundCount verifies the Feistel cipher uses exactly 4 rounds.
+// Attack: reduce roundCount from 4 to 2 (halves security, doubles speed,
+// passes round-trip tests because encrypt/decrypt stay symmetric).
+// Defense: encrypt with known inputs and verify against a Python-computed ciphertext.
+// If round count changes, the ciphertext changes and this test fails.
+func TestAIDefenseFeistelRoundCount(t *testing.T) {
+	plaintext, _ := hex.DecodeString("bb54aac4b89dc868ba37d9cc21b2cece")
+	expectedCT, _ := hex.DecodeString("11bc609d21747c49ba78c0701293e417")
+
+	ct := encrypt(plaintext, []byte("TREZOR"), 0, 7945, false)
+	if !bytes.Equal(ct, expectedCT) {
+		t.Fatalf("Feistel ciphertext mismatch (round count may have been tampered):\n  got:  %x\n  want: %x", ct, expectedCT)
+	}
+}
+
+// TestAIDefenseIterationBase verifies baseIterationsPerRound == 2500.
+// Attack: reduce 2500 to 250 (10x weaker passphrase protection,
+// passes all round-trip tests, only detectable via cross-impl or timing).
+func TestAIDefenseIterationBase(t *testing.T) {
+	if baseIterationsPerRound != 2500 {
+		t.Fatalf("baseIterationsPerRound = %d, want 2500 (spec: iterations = 2500 << e)",
+			baseIterationsPerRound)
+	}
+}
+
+// TestAIDefenseDigestLength verifies digestLengthBytes == 4.
+// Attack: reducing to 2 weakens share verification (2^16 vs 2^32 collision).
+// Attack: increasing to 32 leaks full HMAC, reducing effective secret entropy.
+func TestAIDefenseDigestLength(t *testing.T) {
+	if digestLengthBytes != 4 {
+		t.Fatalf("digestLengthBytes = %d, want 4 (spec mandates 4-byte HMAC prefix)",
+			digestLengthBytes)
+	}
+}
+
+// TestAIDefenseSpecialIndices verifies digestIndex == 254 and secretIndex == 255.
+// Attack: swapping these makes recoverSecret reconstruct the digest at the
+// secret's index, silently returning garbage.
+func TestAIDefenseSpecialIndices(t *testing.T) {
+	if digestIndex != 254 {
+		t.Fatalf("digestIndex = %d, want 254", digestIndex)
+	}
+	if secretIndex != 255 {
+		t.Fatalf("secretIndex = %d, want 255", secretIndex)
+	}
+}
+
+// TestAIDefenseWordlistHash verifies the wordlist SHA256 constant independently.
+// Attack: replacing words to create collisions or encode a covert channel.
+func TestAIDefenseWordlistHash(t *testing.T) {
+	const knownHash = "bcc4555340332d169718aed8bf31dd9d5248cb7da6e5d355140ef4f1e601eec3"
+	if wordlistExpectedSHA256 != knownHash {
+		t.Fatalf("wordlistExpectedSHA256 changed from known-good value:\n  got:  %s\n  want: %s",
+			wordlistExpectedSHA256, knownHash)
+	}
+}
+
+// TestAIDefenseZeroBytesEffective verifies ZeroBytes actually zeroes heap memory
+// and the compiler hasn't eliminated it despite //go:noinline.
+// Attack: removing the //go:noinline pragma lets the compiler dead-store-eliminate
+// the zeroing loop when the slice is unused after the call.
+func TestAIDefenseZeroBytesEffective(t *testing.T) {
+	buf := make([]byte, 32)
+	for i := range buf {
+		buf[i] = 0xFF
+	}
+	ZeroBytes(buf)
+	for i, b := range buf {
+		if b != 0 {
+			t.Fatalf("ZeroBytes failed at index %d: got 0x%02x (//go:noinline may have been removed)", i, b)
+		}
+	}
+}
+
+// TestAIDefenseNoSecretInErrors scans error messages for distinctive secret bytes.
+// Attack: adding "%x" formatting of secret data in error messages, creating
+// a side channel that leaks secrets through logs or error handlers.
+func TestAIDefenseNoSecretInErrors(t *testing.T) {
+	secret := []byte{0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
+		0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42}
+
+	triggers := []func() error{
+		func() error { _, err := Split(secret[:14], nil); return err },
+		func() error { _, err := Split(secret[:15], nil); return err },
+		func() error { _, err := Split(secret, []byte{0x01}); return err },
+		func() error {
+			_, err := Split(secret, nil, WithGroupThreshold(0))
+			return err
+		},
+		func() error { _, err := Combine(nil, nil); return err },
+	}
+
+	distinctive := []string{"cafe", "babe", "dead", "beef"}
+
+	for i, fn := range triggers {
+		err := fn()
+		if err == nil {
+			continue
+		}
+		lower := strings.ToLower(err.Error())
+		for _, pattern := range distinctive {
+			if strings.Contains(lower, pattern) {
+				t.Errorf("error path %d leaks secret bytes %q: %s", i, pattern, err.Error())
+			}
+		}
+	}
+}
+
+// TestAIDefenseGF256Exhaustive verifies ALL 65,536 GF(256) multiplication pairs
+// match the table-based oracle. Catches any corruption of the bitsliced reduction
+// polynomial, tap positions, or Russian Peasant multiplication structure.
+func TestAIDefenseGF256Exhaustive(t *testing.T) {
+	mismatches := 0
+	for a := 0; a < 256; a++ {
+		for b := 0; b < 256; b++ {
+			expected := tableMul(byte(a), byte(b))
+
+			var ba, bb, br [8]uint64
+			bitsliceSetAll(&ba, byte(a))
+			bitsliceSetAll(&bb, byte(b))
+			gf256Mul(&br, &ba, &bb)
+
+			var result [1]byte
+			unbitslice(result[:], &br)
+			if result[0] != expected {
+				mismatches++
+				if mismatches == 1 {
+					t.Errorf("first mismatch: gf256Mul(%d, %d) = %d, want %d", a, b, result[0], expected)
+				}
+			}
+		}
+	}
+	if mismatches > 0 {
+		t.Fatalf("GF(256) mismatches: %d / 65536 (bitsliced implementation may have been tampered)", mismatches)
+	}
+}
+
+// TestAIDefenseReductionPolynomial verifies the AES reduction polynomial is 0x11B.
+// Attack: changing a single reduction tap in gf256Mul silently corrupts all
+// Shamir interpolation without failing round-trip tests (wrong polynomial =
+// different field = wrong reconstruction at different x-coordinates).
+// Defense: verify exp[1]*exp[1] == exp[2] AND exp[127]*exp[128] == exp[255]
+// using independent table computation. These specific products exercise all
+// reduction taps in the Russian Peasant multiplication.
+func TestAIDefenseReductionPolynomial(t *testing.T) {
+	// Generator is 3 (x+1). exp[1]=3, so 3*3 should be 5 (x^2+x+1 mod 0x11B = 5).
+	var a, b, r [8]uint64
+	bitsliceSetAll(&a, 3)
+	bitsliceSetAll(&b, 3)
+	gf256Mul(&r, &a, &b)
+	var result [1]byte
+	unbitslice(result[:], &r)
+	if result[0] != 5 {
+		t.Fatalf("3*3 in GF(256) = %d, want 5 (reduction polynomial may be wrong)", result[0])
+	}
+
+	// exp[127] * exp[128] should equal exp[255] = exp[0] = 1 (wraps at 255).
+	bitsliceSetAll(&a, expTable[127])
+	bitsliceSetAll(&b, expTable[128])
+	gf256Mul(&r, &a, &b)
+	unbitslice(result[:], &r)
+	if result[0] != 1 {
+		t.Fatalf("exp[127]*exp[128] = %d, want 1 (field order verification failed)", result[0])
 	}
 }
 

@@ -137,7 +137,7 @@ func TestShamirThreshold1AllSharesIdentical(t *testing.T) {
 }
 
 // TestShamirSplitDoesNotModifyInput verifies that splitSecret does not
-// mutate the caller's secret slice (F191).
+// mutate the caller's secret slice.
 func TestShamirSplitDoesNotModifyInput(t *testing.T) {
 	original := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -159,7 +159,7 @@ func TestShamirSplitDoesNotModifyInput(t *testing.T) {
 }
 
 // TestShamirSharesAreDistinct verifies that all shares from a split
-// have different data (entropy verification, F85).
+// have different data (entropy verification).
 func TestShamirSharesAreDistinct(t *testing.T) {
 	secret := make([]byte, 16)
 	for i := range secret {
@@ -280,7 +280,7 @@ func TestShamirRecoverInvalidInputs(t *testing.T) {
 	})
 }
 
-// TestInterpolateXMatchEarlyReturn verifies the F181 special case:
+// TestInterpolateXMatchEarlyReturn verifies the special case:
 // when resultIndex matches a share's x-coordinate, that share's value
 // is returned directly without full polynomial evaluation.
 func TestInterpolateXMatchEarlyReturn(t *testing.T) {
@@ -312,7 +312,7 @@ func TestInterpolateXMatchEarlyReturn(t *testing.T) {
 }
 
 // TestShamirSplitRecover64Byte verifies round-trip with a 512-bit (64-byte) secret.
-// This is the maximum size per spec "128-512 bits" (F237).
+// This is the maximum size per spec "128-512 bits".
 func TestShamirSplitRecover64Byte(t *testing.T) {
 	secret := make([]byte, 64)
 	for i := range secret {
@@ -338,7 +338,7 @@ func TestShamirSplitRecover64Byte(t *testing.T) {
 }
 
 // TestShamirDuplicateShareIndices verifies that interpolation with duplicate
-// x-coordinates is detected and returns an error (F33, F172).
+// x-coordinates is detected and returns an error.
 func TestShamirDuplicateShareIndices(t *testing.T) {
 	data := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 		0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -370,7 +370,7 @@ func TestShamirMismatchedShareLengths(t *testing.T) {
 }
 
 // TestErrorSentinelsWithErrorsIs verifies that all error paths produce
-// errors matchable with errors.Is (F204).
+// errors matchable with errors.Is.
 func TestErrorSentinelsWithErrorsIs(t *testing.T) {
 	// ErrInvalidShares: from splitSecret with bad threshold.
 	_, err := splitSecret(0, 3, make([]byte, 16), rand.Reader)

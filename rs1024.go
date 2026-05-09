@@ -3,7 +3,7 @@
 //
 // RS1024 error-detecting code (BCH code over GF(1024)).
 // Used for SLIP-0039 mnemonic checksum validation.
-// All values are public data (word indices); no constant-time requirement (F177).
+// All values are public data (word indices); no constant-time requirement.
 
 package slip39
 
@@ -19,7 +19,7 @@ const (
 // malicious modification at runtime.
 func rs1024Polymod(values []int) uint32 {
 	// BCH generator polynomial coefficients.
-	// Verified against the SLIP-0039 spec and all reference implementations (F182, F217).
+	// Verified against the SLIP-0039 spec and all reference implementations.
 	gen := [10]uint32{
 		0xE0E040,
 		0x1C1C080,

@@ -39,7 +39,7 @@ type share struct {
 // given a set of shares. This is the core Shamir reconstruction operation.
 //
 // All arithmetic is bitsliced and constant-time on secret data.
-// The only data-dependent branch is on public share indices (F35).
+// The only data-dependent branch is on public share indices.
 //
 // Returns error if share indices are not unique (duplicate detection via
 // zero-denominator check) or if len exceeds maxSecretLen.
@@ -72,19 +72,19 @@ func interpolate(result []byte, resultIndex byte, shares []share) error {
 	var tmp [8]uint64
 	var secret [8]uint64
 
-	// Cleanup all intermediates (F283, F284).
+	// Cleanup all intermediates.
 	defer func() {
-		ZeroUint64Array(&x)
+		zeroUint64Array(&x)
 		for i := range xs {
-			ZeroUint64Array(&xs[i])
+			zeroUint64Array(&xs[i])
 		}
 		for i := range ys {
-			ZeroUint64Array(&ys[i])
+			zeroUint64Array(&ys[i])
 		}
-		ZeroUint64Array(&num)
-		ZeroUint64Array(&denom)
-		ZeroUint64Array(&tmp)
-		ZeroUint64Array(&secret)
+		zeroUint64Array(&num)
+		zeroUint64Array(&denom)
+		zeroUint64Array(&tmp)
+		zeroUint64Array(&secret)
 	}()
 
 	// Collect x and y values into bitsliced form.
@@ -105,7 +105,7 @@ func interpolate(result []byte, resultIndex byte, shares []share) error {
 
 	// Lagrange basis polynomial evaluation.
 	for i := 0; i < shareCount; i++ {
-		// F181: if resultIndex matches a share index, return that share directly.
+		// If resultIndex matches a share index, return that share directly.
 		if shares[i].x == resultIndex {
 			bitsliceSetAll(&denom, 1)
 			gf256Add(&secret, &ys[i])
@@ -121,7 +121,7 @@ func interpolate(result []byte, resultIndex byte, shares []share) error {
 			gf256Add(&tmp, &xs[j])
 			gf256Mul(&denom, &denom, &tmp)
 		}
-		// Zero denominator means duplicate share indices (F33).
+		// Zero denominator means duplicate share indices.
 		if (denom[0] | denom[1] | denom[2] | denom[3] | denom[4] | denom[5] | denom[6] | denom[7]) == 0 {
 			return fmt.Errorf("slip39: %w: share indices are not unique", ErrInvalidShares)
 		}
@@ -185,11 +185,11 @@ func splitSecret(threshold, shareCount int, sharedSecret []byte, rng io.Reader) 
 		return nil, fmt.Errorf("slip39: %w: secret length must be even", ErrInvalidSecret)
 	}
 
-	// F40: threshold == 1 special case. All shares are copies of the secret.
+	// Threshold == 1 special case. All shares are copies of the secret.
 	if threshold == 1 {
 		shares := make([]share, shareCount)
 		for i := 0; i < shareCount; i++ {
-			// F102, F136: copy data per share, do NOT alias.
+			// Copy data per share, do NOT alias.
 			data := make([]byte, secretLen)
 			copy(data, sharedSecret)
 			shares[i] = share{x: byte(i), data: data}
@@ -197,7 +197,7 @@ func splitSecret(threshold, shareCount int, sharedSecret []byte, rng io.Reader) 
 		return shares, nil
 	}
 
-	// F179, F232: Pre-read ALL random bytes upfront.
+	// Pre-read ALL random bytes upfront.
 	// Random shares: (threshold - 2) shares of secretLen bytes each.
 	// Digest share: (secretLen - digestLengthBytes) random bytes.
 	randomShareCount := threshold - 2
@@ -276,7 +276,7 @@ func splitSecret(threshold, shareCount int, sharedSecret []byte, rng io.Reader) 
 		}
 	}
 
-	// Zero base shares (F285).
+	// Zero base shares.
 	for i := range baseShares {
 		ZeroBytes(baseShares[i].data)
 	}
@@ -300,7 +300,7 @@ func recoverSecret(threshold int, shares []share) ([]byte, error) {
 
 	sharedSecret := make([]byte, len(shares[0].data))
 
-	// F40: threshold == 1 special case.
+	// Threshold == 1 special case.
 	if threshold == 1 {
 		copy(sharedSecret, shares[0].data)
 		return sharedSecret, nil
@@ -314,10 +314,10 @@ func recoverSecret(threshold int, shares []share) ([]byte, error) {
 
 	// Reconstruct the digest share at digestIndex.
 	digestShare := make([]byte, len(shares[0].data))
-	defer ZeroBytes(digestShare) // F286: always zero.
+	defer ZeroBytes(digestShare) // Always zero.
 
 	if err := interpolate(digestShare, digestIndex, shares[:threshold]); err != nil {
-		ZeroBytes(sharedSecret) // F286: zero on error.
+		ZeroBytes(sharedSecret) // Zero on error.
 		return nil, err
 	}
 
@@ -327,9 +327,9 @@ func recoverSecret(threshold int, shares []share) ([]byte, error) {
 	expectedDigest := createDigest(randomPart, sharedSecret)
 	defer ZeroBytes(expectedDigest)
 
-	// F9: constant-time comparison.
+	// Constant-time comparison.
 	if subtle.ConstantTimeCompare(digest, expectedDigest) != 1 {
-		ZeroBytes(sharedSecret) // F286: zero on error.
+		ZeroBytes(sharedSecret) // Zero on error.
 		return nil, fmt.Errorf("slip39: %w", ErrDigestMismatch)
 	}
 
