@@ -64,8 +64,7 @@ func gf256Add(r *[8]uint64, x *[8]uint64) {
 func gf256Mul(r *[8]uint64, a *[8]uint64, b *[8]uint64) {
 	// Copy a to a2 so we can modify it during reduction.
 	// This is the mechanical safety for r==a aliasing (F56, F169).
-	var a2 [8]uint64
-	a2 = *a
+	a2 := *a
 
 	r[0] = a2[0] & b[0]
 	r[1] = a2[1] & b[0]
@@ -166,6 +165,11 @@ func gf256Mul(r *[8]uint64, a *[8]uint64, b *[8]uint64) {
 // gf256Square squares x in GF(2^8) and writes the result to r.
 // r and x may overlap (in-place squaring is safe).
 // Uses the Freshman's Dream rule: (a+b)^2 = a^2 + b^2 in characteristic 2.
+//
+// Note: local variables r14, r12, r10, r8 hold secret bit-plane data on the stack.
+// Go does not provide a mechanism to zero stack variables on return. This matches
+// Trezor C's behavior (stack temporaries are not memzeroed in gf256_square either).
+// The caller (gf256Inv) zeroes its own heap-allocated intermediates via ZeroUint64Array.
 func gf256Square(r *[8]uint64, x *[8]uint64) {
 	r14 := x[7]
 	r12 := x[6]

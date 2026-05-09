@@ -249,6 +249,8 @@ func splitSecret(threshold, shareCount int, sharedSecret []byte, rng io.Reader) 
 
 	// Generate output shares by interpolating at indices 0..shareCount-1.
 	// Random shares that already exist are reused directly.
+	// Note: randomShareCount = threshold-2, and threshold <= shareCount (checked above),
+	// so at least 2 shares (digestIndex + secretIndex positions) are always interpolated.
 	shares := make([]share, shareCount)
 	for i := 0; i < shareCount; i++ {
 		if i < randomShareCount {
@@ -259,7 +261,9 @@ func splitSecret(threshold, shareCount int, sharedSecret []byte, rng io.Reader) 
 		} else {
 			data := make([]byte, secretLen)
 			if err := interpolate(data, byte(i), baseShares); err != nil {
-				// Cleanup on error.
+				// Cleanup on error: zero the partially-written buffer
+				// and all previously generated shares.
+				ZeroBytes(data)
 				for j := 0; j < i; j++ {
 					ZeroBytes(shares[j].data)
 				}

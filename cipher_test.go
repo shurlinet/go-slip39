@@ -6,6 +6,7 @@ package slip39
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"testing"
@@ -242,5 +243,43 @@ func TestFeistelNilPassphrase(t *testing.T) {
 	dec := decrypt(ctNil, nil, 0, 7945, false)
 	if !bytes.Equal(dec, secret) {
 		t.Fatalf("decrypt with nil passphrase failed:\n  got:  %x\n  want: %x", dec, secret)
+	}
+}
+
+// BenchmarkFeistelEncrypt128 establishes the performance baseline for
+// Feistel encryption of a 128-bit secret. PBKDF2 dominates runtime.
+func BenchmarkFeistelEncrypt128(b *testing.B) {
+	secret, _ := hex.DecodeString("bb54aac4b89dc868ba37d9cc21b2cece")
+	pass := []byte("TREZOR")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		result := encrypt(secret, pass, 0, 7945, false)
+		ZeroBytes(result)
+	}
+}
+
+// BenchmarkFeistelEncrypt256 benchmarks 256-bit Feistel encryption.
+func BenchmarkFeistelEncrypt256(b *testing.B) {
+	secret := make([]byte, 32)
+	for i := range secret {
+		secret[i] = byte(i)
+	}
+	pass := []byte("TREZOR")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		result := encrypt(secret, pass, 0, 7945, false)
+		ZeroBytes(result)
+	}
+}
+
+// BenchmarkShamirSplit3of5 benchmarks Shamir split for 3-of-5 with 128-bit secret.
+func BenchmarkShamirSplit3of5(b *testing.B) {
+	secret, _ := hex.DecodeString("bb54aac4b89dc868ba37d9cc21b2cece")
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		shares, _ := splitSecret(3, 5, secret, rand.Reader)
+		for _, s := range shares {
+			ZeroBytes(s.data)
+		}
 	}
 }

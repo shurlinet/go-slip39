@@ -6,6 +6,7 @@ package slip39
 import (
 	"bytes"
 	"crypto/rand"
+	"errors"
 	"testing"
 )
 
@@ -84,9 +85,9 @@ func TestShamirSplitRecoverRoundTrip256(t *testing.T) {
 	}
 }
 
-// TestShamirRecoverWrongShares verifies that using fewer than threshold shares
-// produces a digest mismatch error (not a silent wrong result).
-func TestShamirRecoverWrongShares(t *testing.T) {
+// TestShamirRecoverWrongThreshold verifies that recovering with the wrong
+// threshold produces a digest mismatch error, not a silent wrong result.
+func TestShamirRecoverWrongThreshold(t *testing.T) {
 	secret := make([]byte, 16)
 	for i := range secret {
 		secret[i] = byte(i + 1)
@@ -97,18 +98,17 @@ func TestShamirRecoverWrongShares(t *testing.T) {
 		t.Fatalf("splitSecret: %v", err)
 	}
 
-	// Try with only 2 shares but tell recoverSecret threshold is 2 (wrong).
-	// This should reconstruct an incorrect polynomial and fail digest check.
-	// Use threshold=2 with shares that were generated for threshold=3.
-	wrongResult, err := recoverSecret(2, shares[:2])
+	// Use threshold=2 with shares generated for threshold=3.
+	// The polynomial is degree 2 (3 base points), so interpolation with
+	// 2 points reconstructs a different (degree-1) polynomial. The digest
+	// check must catch this.
+	_, err = recoverSecret(2, shares[:2])
 	if err == nil {
-		// If it didn't error, the result must not match the original secret.
-		if bytes.Equal(wrongResult, secret) {
-			t.Fatal("wrong threshold produced correct secret - mathematically impossible with random data")
-		}
-		ZeroBytes(wrongResult)
+		t.Fatal("expected error for wrong threshold, got nil")
 	}
-	// err != nil is expected (digest mismatch). Either outcome is acceptable.
+	if !errors.Is(err, ErrDigestMismatch) {
+		t.Fatalf("expected ErrDigestMismatch, got: %v", err)
+	}
 
 	for _, s := range shares {
 		ZeroBytes(s.data)
@@ -216,8 +216,8 @@ func TestShamirRecoverWithDifferentShareSubsets(t *testing.T) {
 	}
 }
 
-// TestShamirInvalidInputs verifies error handling for bad inputs.
-func TestShamirInvalidInputs(t *testing.T) {
+// TestShamirSplitInvalidInputs verifies error handling for bad splitSecret inputs.
+func TestShamirSplitInvalidInputs(t *testing.T) {
 	secret16 := make([]byte, 16)
 
 	tests := []struct {
@@ -242,6 +242,42 @@ func TestShamirInvalidInputs(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestShamirRecoverInvalidInputs verifies error handling for bad recoverSecret inputs.
+func TestShamirRecoverInvalidInputs(t *testing.T) {
+	data16 := make([]byte, 16)
+	validShares := []share{
+		{x: 0, data: data16},
+		{x: 1, data: data16},
+	}
+
+	t.Run("threshold 0", func(t *testing.T) {
+		_, err := recoverSecret(0, validShares)
+		if err == nil {
+			t.Fatal("expected error for threshold=0")
+		}
+		if !errors.Is(err, ErrInvalidShares) {
+			t.Fatalf("expected ErrInvalidShares, got: %v", err)
+		}
+	})
+
+	t.Run("threshold negative", func(t *testing.T) {
+		_, err := recoverSecret(-1, validShares)
+		if err == nil {
+			t.Fatal("expected error for threshold=-1")
+		}
+	})
+
+	t.Run("not enough shares", func(t *testing.T) {
+		_, err := recoverSecret(3, validShares[:1])
+		if err == nil {
+			t.Fatal("expected error for insufficient shares")
+		}
+		if !errors.Is(err, ErrInvalidShares) {
+			t.Fatalf("expected ErrInvalidShares, got: %v", err)
+		}
+	})
 }
 
 // TestInterpolateXMatchEarlyReturn verifies the F181 special case:
@@ -330,5 +366,38 @@ func TestShamirMismatchedShareLengths(t *testing.T) {
 	err := interpolate(result, 5, shares)
 	if err == nil {
 		t.Fatal("expected error for mismatched share lengths, got nil")
+	}
+}
+
+// TestErrorSentinelsWithErrorsIs verifies that all error paths produce
+// errors matchable with errors.Is (F204).
+func TestErrorSentinelsWithErrorsIs(t *testing.T) {
+	// ErrInvalidShares: from splitSecret with bad threshold.
+	_, err := splitSecret(0, 3, make([]byte, 16), rand.Reader)
+	if !errors.Is(err, ErrInvalidShares) {
+		t.Fatalf("splitSecret threshold=0: expected ErrInvalidShares, got %v", err)
+	}
+
+	// ErrInvalidSecret: from splitSecret with bad secret length.
+	_, err = splitSecret(2, 3, make([]byte, 15), rand.Reader)
+	if !errors.Is(err, ErrInvalidSecret) {
+		t.Fatalf("splitSecret len=15: expected ErrInvalidSecret, got %v", err)
+	}
+
+	// ErrDigestMismatch: from recoverSecret with wrong threshold.
+	secret := make([]byte, 16)
+	for i := range secret {
+		secret[i] = byte(i)
+	}
+	shares, err := splitSecret(3, 5, secret, rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = recoverSecret(2, shares[:2])
+	if !errors.Is(err, ErrDigestMismatch) {
+		t.Fatalf("recoverSecret wrong threshold: expected ErrDigestMismatch, got %v", err)
+	}
+	for _, s := range shares {
+		ZeroBytes(s.data)
 	}
 }

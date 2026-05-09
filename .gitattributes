@@ -1,0 +1,3 @@
+# Preserve exact line endings for the wordlist.
+# SHA256 integrity check in init() will fail if LF is converted to CRLF.
+wordlist.txt binary

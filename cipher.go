@@ -169,6 +169,9 @@ func decrypt(ems, passphrase []byte, iterationExponent, identifier int, extendab
 
 // xorBytes XORs a and b into dst. All three must have the same length.
 func xorBytes(dst, a, b []byte) {
+	if len(a) != len(dst) || len(b) != len(dst) {
+		panic("slip39: xorBytes length mismatch")
+	}
 	for i := range dst {
 		dst[i] = a[i] ^ b[i]
 	}
