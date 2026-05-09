@@ -34,9 +34,9 @@ func (w *bitStreamWriter) Write(value uint64, count int) {
 	}
 	for i := count - 1; i >= 0; i-- {
 		byteIdx := w.bitPos / 8
-		bitIdx := 7 - (w.bitPos % 8)
+		bitIdx := uint(7 - (w.bitPos % 8))
 		if (value>>i)&1 != 0 {
-			w.buf[byteIdx] |= 1 << bitIdx
+			w.buf[byteIdx] |= byte(1) << bitIdx
 		}
 		w.bitPos++
 	}
@@ -75,9 +75,9 @@ func (r *bitStreamReader) Read(count int) (uint64, error) {
 	var value uint64
 	for i := count - 1; i >= 0; i-- {
 		byteIdx := r.bitPos / 8
-		bitIdx := 7 - (r.bitPos % 8)
+		bitIdx := uint(7 - (r.bitPos % 8))
 		if (r.buf[byteIdx]>>bitIdx)&1 != 0 {
-			value |= 1 << i
+			value |= uint64(1) << uint(i)
 		}
 		r.bitPos++
 	}
