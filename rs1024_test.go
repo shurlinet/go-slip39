@@ -5,26 +5,32 @@ package slip39
 
 import "testing"
 
-// TestRS1024AntiTamperPolynomial verifies the generator polynomial constants
-// match the SLIP-0039 spec by computing a known checksum (F217).
-func TestRS1024AntiTamperPolynomial(t *testing.T) {
-	// Spec vector 1 mnemonic word indices (20 words, first share of 1-of-1):
-	// "duckling enlarge academic academic agency result length ..."
-	// We test with a small known input and verify the polymod output.
+// TestRS1024SpecVector1 verifies RS1024 against actual spec vector 1.
+// Word indices verified by parsing the real mnemonic through Python reference:
+// "duckling enlarge academic academic agency result length solution fridge
+//
+//	kidney coal piece deal husband erode duke ajar critical decision keyboard"
+//
+// Customization string "shamir" (non-extendable, vector 1 has ext=false).
+func TestRS1024SpecVector1(t *testing.T) {
+	// All 20 word indices from spec vector 1, verified against Python shamir_mnemonic.
+	allWords := []int{
+		248, 288, 0, 0, 17, 753, 521, 840, 372, 497,
+		155, 670, 192, 448, 297, 249, 23, 173, 196, 496,
+	}
 	cs := []byte("shamir")
-	data := []int{248, 288, 0, 0, 16, 776, 512, 560, 216, 376, 888, 576, 40, 264, 72, 248, 960}
 
+	// The full 20-word codeword (17 data + 3 checksum) must verify.
+	if !rs1024VerifyChecksum(allWords, cs) {
+		t.Fatal("rs1024VerifyChecksum failed on spec vector 1")
+	}
+
+	// Also verify our createChecksum matches the spec's checksum words.
+	data := allWords[:17]
 	checksum := rs1024CreateChecksum(data, cs)
-
-	// Verify the checksum can be verified.
-	full := make([]int, len(data)+checksumLengthWords)
-	copy(full, data)
-	full[len(data)] = checksum[0]
-	full[len(data)+1] = checksum[1]
-	full[len(data)+2] = checksum[2]
-
-	if !rs1024VerifyChecksum(full, cs) {
-		t.Fatal("rs1024VerifyChecksum failed on valid data + checksum")
+	expectedChecksum := [3]int{173, 196, 496}
+	if checksum != expectedChecksum {
+		t.Fatalf("checksum mismatch: got %v, want %v", checksum, expectedChecksum)
 	}
 }
 
@@ -78,18 +84,14 @@ func TestRS1024InvalidChecksum(t *testing.T) {
 
 // TestRS1024ExhaustiveSingleErrorDetection verifies that flipping any single
 // word in a valid codeword to any other value is detected (F256).
-// Tests 20 positions * 1023 alternatives = 20,460 cases.
+// Uses spec vector 1 (20 words). Tests 20 * 1023 = 20,460 cases.
 func TestRS1024ExhaustiveSingleErrorDetection(t *testing.T) {
-	// Build a 17-word data + 3-word checksum = 20 words total.
-	data := []int{248, 288, 0, 0, 16, 776, 512, 560, 216, 376, 888, 576, 40, 264, 72, 248, 960}
-	cs := []byte("shamir")
-	checksum := rs1024CreateChecksum(data, cs)
-
-	codeword := make([]int, len(data)+checksumLengthWords)
-	copy(codeword, data)
-	for i := 0; i < checksumLengthWords; i++ {
-		codeword[len(data)+i] = checksum[i]
+	// Spec vector 1: all 20 word indices (verified against Python reference).
+	codeword := []int{
+		248, 288, 0, 0, 17, 753, 521, 840, 372, 497,
+		155, 670, 192, 448, 297, 249, 23, 173, 196, 496,
 	}
+	cs := []byte("shamir")
 
 	// Sanity: original is valid.
 	if !rs1024VerifyChecksum(codeword, cs) {
