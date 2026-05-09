@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Satinderjit Singh
 // SPDX-License-Identifier: MIT
-//
+
 // RS1024 error-detecting code (BCH code over GF(1024)).
 // Used for SLIP-0039 mnemonic checksum validation.
 // All values are public data (word indices); no constant-time requirement.

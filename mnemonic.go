@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Satinderjit Singh
 // SPDX-License-Identifier: MIT
-//
+
 // Mnemonic encoding and decoding for SLIP-0039 shares.
 // Uses BitStream for 10-bit word packing, inspired by C# Slip39 (lontivero/Slip39).
 // Wordlist loaded via go:embed with SHA256 integrity check at init.

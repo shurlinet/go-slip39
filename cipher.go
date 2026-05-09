@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Satinderjit Singh
 // SPDX-License-Identifier: MIT
-//
+
 // 4-round Feistel cipher using PBKDF2-HMAC-SHA256 as the round function.
 // Encrypts and decrypts the master secret as specified by SLIP-0039.
 

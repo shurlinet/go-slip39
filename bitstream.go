@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Satinderjit Singh
 // SPDX-License-Identifier: MIT
-//
+
 // BitStream provides bit-level packing and unpacking for SLIP-0039 mnemonic encoding.
 // Inspired by the C# Slip39 implementation (lontivero/Slip39).
 // Replaces math/big for 10-bit word encoding, eliminating big.Int limb zeroing concerns.

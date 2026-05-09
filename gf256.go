@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Satinderjit Singh
 // SPDX-License-Identifier: MIT
-//
+
 // Bitsliced GF(2^8) arithmetic reduced by x^8 + x^4 + x^3 + x + 1 (AES polynomial 0x11B).
 //
 // Translated from Trezor firmware crypto/shamir.c by Daan Sprenkels.
